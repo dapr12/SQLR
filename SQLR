@@ -1,0 +1,424 @@
+rm(list=ls(all=TRUE))
+library(DBI);
+library(RSQLite);
+library(Hmisc);
+library(st)
+library(tseries)
+library(TSA)
+
+# Lectura de los Archivos en Dataframe
+SIMAT2000<- data.frame(read.table("SIMAT_2000.txt", header = TRUE,sep = ""))
+SIMAT2001<- data.frame(read.table("SIMAT_2001.txt", header = TRUE,sep = ""))
+SIMAT2002<- data.frame(read.table("SIMAT_2002.txt", header = TRUE,sep = ""))
+SIMAT2003<- data.frame(read.table("SIMAT_2003.txt", header = TRUE,sep = ""))
+SIMAT2004<- data.frame(read.table("SIMAT_2004.txt", header = TRUE,sep = ""))
+SIMAT2005<- data.frame(read.table("SIMAT_2005.txt", header = TRUE,sep = ""))
+SIMAT2006<- data.frame(read.table("SIMAT_2006.txt", header = TRUE,sep = ""))
+SIMAT2007<- data.frame(read.table("SIMAT_2007.txt", header = TRUE,sep = ""))
+SIMAT2008<- data.frame(read.table("SIMAT_2008.txt", header = TRUE,sep = ""))
+SIMAT2009<- data.frame(read.table("SIMAT_2009.txt", header = TRUE,sep = ""))
+
+names(SIMAT2000); names(SIMAT2001); names(SIMAT2002); names(SIMAT2003);
+names(SIMAT2004); names(SIMAT2005); names(SIMAT2006); names(SIMAT2007);
+names(SIMAT2008); names(SIMAT2009);
+
+attach(SIMAT2000); attach(SIMAT2001); attach(SIMAT2002); attach(SIMAT2003);
+attach(SIMAT2004); attach(SIMAT2005); attach(SIMAT2006); attach(SIMAT2007);
+attach(SIMAT2008); attach(SIMAT2009);
+
+#str(SIMAT2000); str(SIMAT2001); str(SIMAT2002); str(SIMAT2003); str(SIMAT2004);
+#str(SIMAT2005); str(SIMAT2006); str(SIMAT2007); str(SIMAT2008); str(SIMAT2009);
+
+
+SEMANA<-rep(1:53, each = 168,len=8784)
+SIMAT2000<-cbind(SIMAT2000,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2001<-cbind(SIMAT2001,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2002<-cbind(SIMAT2002,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2003<-cbind(SIMAT2003,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8784)
+SIMAT2004<-cbind(SIMAT2004,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2005<-cbind(SIMAT2005,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2006<-cbind(SIMAT2006,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2007<-cbind(SIMAT2007,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8784)
+SIMAT2008<-cbind(SIMAT2008,SEMANA)
+
+SEMANA<-rep(1:53, each = 168,len=8760)
+SIMAT2009<-cbind(SIMAT2009,SEMANA)
+
+# Define un Driver de Base de Datos 
+driver<-dbDriver("SQLite"); 
+
+# Define la Conexión a SIMAT.DB
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+
+# Escribe de las WRITE IRIS DATA FRAME INTO TABLE TBL_IRIS OF DATABASE 
+dbWriteTable(connect, "SIMAT2000" ,SIMAT2000); 
+dbWriteTable(connect, "SIMAT2001" ,SIMAT2001); 
+dbWriteTable(connect, "SIMAT2002" ,SIMAT2002); 
+dbWriteTable(connect, "SIMAT2003" ,SIMAT2003); 
+dbWriteTable(connect, "SIMAT2004" ,SIMAT2004); 
+dbWriteTable(connect, "SIMAT2005" ,SIMAT2005); 
+dbWriteTable(connect, "SIMAT2006" ,SIMAT2006); 
+dbWriteTable(connect, "SIMAT2007" ,SIMAT2007); 
+dbWriteTable(connect, "SIMAT2008" ,SIMAT2008); 
+dbWriteTable(connect, "SIMAT2009" ,SIMAT2009); 
+
+# LIST ALL TABLES IN THE DATABASE
+dbListTables(connect);
+
+# CLOSE THE CONNECTION
+sqliteCloseConnection(connect);
+
+# CLOSE THE DRIVER
+sqliteCloseDriver(driver);
+
+##################################
+#### Enviar una Consulta #########
+##################################
+
+## Consulta de los nombres
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+dbListFields(connect, "SIMAT2000")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+# [1] "row_names"        "FECHA"            "HORA"             "COTLA__ppm_"     
+# [5] "COMER__ppm_"      "COPED__ppm_"      "COUIZ__ppm_"      "COSAG__ppm_"     
+# [9] "NO2SAG__ppb_"     "NO2TLA__ppb_"     "NO2MER__ppb_"     "NO2PED__ppb_"    
+#[13] "NO2UIZ__ppb_"     "NOXSAG__ppb_"     "NOXTLA__ppb_"     "NOXMER__ppb_"    
+#[17] "NOXPED__ppb_"     "NOXUIZ__ppb_"     "O3SAG__ppb_"      "O3TLA__ppb_"     
+#[21] "O3MER__ppb_"      "O3PED__ppb_"      "O3UIZ__ppb_"      "SO2SAG__ppb_"    
+#[25] "SO2TLA__ppb_"     "SO2MER__ppb_"     "SO2PED__ppb_"     "SO2UIZ__ppb_"    
+#[29] "PM10TLA__µg_m3_"  "PM10MER__µg_m3_"  "PM10PED__µg_m3_"  "PM10SAG__µg_m3_" 
+#[33] "PM25MER__µg_m3_"  "PM25TLA__µg_m3_"  "PM25UIZ__µg_m3_"  "PM25SAG__µg_m3_" 
+#[37] "TMPSAG__gradosC_" "TMPTLA__gradosC_" "TMPMER__gradosC_" "TMPPED__gradosC_"
+#[41] "HRSAG____"        "HRTLA____"        "HRMER____"        "HRPED____"       
+#[45] "VVSAG__m_s_"      "VVTLA__m_s_"      "VVMER__m_s_"      "VVPED__m_s_"     
+#[49] "DVSAG__grados_"   "DVTLA__grados_"   "DVMER__grados_"   "DVPED__grados_"  
+#[53] "SEMANA"        
+
+
+##################################################################################################################
+################################ P   R  O  M   E   D  I  O  S ####################################################
+##################################################################################################################
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+COTLA_ppm.Limpio2000 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2000.DVTLA__grados_)",
+										"FROM SIMAT2000", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2001 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2001.DVTLA__grados_)",
+										"FROM SIMAT2001", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2002 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2002.DVTLA__grados_)",
+										"FROM SIMAT2002", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2003 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2003.DVTLA__grados_)",
+										"FROM SIMAT2003", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2004 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2004.DVTLA__grados_)",
+										"FROM SIMAT2004", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2005 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2005.DVTLA__grados_)",
+										"FROM SIMAT2005", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2006 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2006.DVTLA__grados_)",
+										"FROM SIMAT2006", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2007 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2007.DVTLA__grados_)",
+										"FROM SIMAT2007", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2008 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2008.DVTLA__grados_)",
+										"FROM SIMAT2008", "WHERE DVTLA__grados_ > -9.9 GROUP BY SEMANA" ) )																
+COTLA_ppm.Limpio2009 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2009.DVTLA__grados_)",
+										"FROM SIMAT2009", "WHERE DVTLA__grados_> -9.9 GROUP BY SEMANA" ) )																
+t0<- ts(COTLA_ppm.Limpio2000);t1<- ts(COTLA_ppm.Limpio2001);t2<- ts(COTLA_ppm.Limpio2002);t3<- ts(COTLA_ppm.Limpio2003);t4<- ts(COTLA_ppm.Limpio2004);
+t5<- ts(COTLA_ppm.Limpio2005);t6<- ts(COTLA_ppm.Limpio2006);t7<- ts(COTLA_ppm.Limpio2007);t8<- ts(COTLA_ppm.Limpio2008);t9<- ts(COTLA_ppm.Limpio2009);
+COTLA_ppm.2000a20009AVG<-rbind(t0,t1,t2,t3,t4,t5,t6,t7,t8,t9)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.2000a20009AVG),ylab="Unidades grados", main="DVTLA__grados_(Promedios SEMANALES ) Estación Talnepantla")
+#lines(HoltWinters(COTLA_ppm.2000a20009AVG)$fitted,col="red")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+
+##################################################################################################################
+###########################      M   A   X   I    M    O   S  ####################################################
+##################################################################################################################
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+#dbListFields(connect, "SIMAT2009")
+COTLA_ppm.Limpio2000 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2000.NO2TLA__ppb_)",
+										"FROM SIMAT2000", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2001 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2001.NO2TLA__ppb_)",
+										"FROM SIMAT2001", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2002 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2002.NO2TLA__ppb_)",
+										"FROM SIMAT2002", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2003 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2003.NO2TLA__ppb_)",
+										"FROM SIMAT2003", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2004 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2004.NO2TLA__ppb_)",
+										"FROM SIMAT2004", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2005 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2005.NO2TLA__ppb_)",
+										"FROM SIMAT2005", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2006 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2006.NO2TLA__ppb_)",
+										"FROM SIMAT2006", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2007 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2007.NO2TLA__ppb_)",
+										"FROM SIMAT2007", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )
+COTLA_ppm.Limpio2008 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2008.NO2TLA__ppb_)",
+										"FROM SIMAT2008", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )																
+COTLA_ppm.Limpio2009 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2009.NO2TLA__ppb_)",
+										"FROM SIMAT2009", "WHERE NO2TLA__ppb_ > -9.9 GROUP BY SEMANA" ) )																
+t0<- ts(COTLA_ppm.Limpio2000);t1<- ts(COTLA_ppm.Limpio2001);t2<- ts(COTLA_ppm.Limpio2002);t3<- ts(COTLA_ppm.Limpio2003);t4<- ts(COTLA_ppm.Limpio2004);
+t5<- ts(COTLA_ppm.Limpio2005);t6<- ts(COTLA_ppm.Limpio2006);t7<- ts(COTLA_ppm.Limpio2007);t8<- ts(COTLA_ppm.Limpio2008);t9<- ts(COTLA_ppm.Limpio2009);
+COTLA_ppm.2000a20009AVG<-rbind(t0,t1,t2,t3,t4,t5,t6,t7,t8,t9)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.2000a20009AVG),ylab="Unidades PPB ", main="NO2TLA__ppb_(MAX SEMANALES ) Estación Talnepantla")
+#lines(HoltWinters(COTLA_ppm.2000a20009AVG)$fitted,col="red")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+
+
+
+
+
+
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+#dbListFields(connect, "SIMAT2009")
+COTLA_ppm.Limpio2000 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2000.COTLA__ppm_)",
+										"FROM SIMAT2000", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2001 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2001.COTLA__ppm_)",
+										"FROM SIMAT2001", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2002 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2002.COTLA__ppm_)",
+										"FROM SIMAT2002", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2003 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2003.COTLA__ppm_)",
+										"FROM SIMAT2003", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2004 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2004.COTLA__ppm_)",
+										"FROM SIMAT2004", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2005 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2005.COTLA__ppm_)",
+										"FROM SIMAT2005", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2006 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2006.COTLA__ppm_)",
+										"FROM SIMAT2006", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2007 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2007.COTLA__ppm_)",
+										"FROM SIMAT2007", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2008 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2008.COTLA__ppm_)",
+										"FROM SIMAT2008", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )																
+COTLA_ppm.Limpio2009 <- dbGetQuery(connect, statement = paste( "SELECT AVG(SIMAT2009.COTLA__ppm_)",
+										"FROM SIMAT2009", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )																
+str(COTLA_ppm.Limpio2000); str(COTLA_ppm.Limpio2001); str(COTLA_ppm.Limpio2002); str(COTLA_ppm.Limpio2003);
+str(COTLA_ppm.Limpio2004); str(COTLA_ppm.Limpio2005); str(COTLA_ppm.Limpio2006); str(COTLA_ppm.Limpio2007);
+str(COTLA_ppm.Limpio2008); str(COTLA_ppm.Limpio2009);
+t0<- ts(COTLA_ppm.Limpio2000);t1<- ts(COTLA_ppm.Limpio2001);t2<- ts(COTLA_ppm.Limpio2002);t3<- ts(COTLA_ppm.Limpio2003);t4<- ts(COTLA_ppm.Limpio2004);
+t5<- ts(COTLA_ppm.Limpio2005);t6<- ts(COTLA_ppm.Limpio2006);t7<- ts(COTLA_ppm.Limpio2007);t8<- ts(COTLA_ppm.Limpio2008);t9<- ts(COTLA_ppm.Limpio2009);
+COTLA_ppm.2000a20009AVG<-ts.union(t0,t1,t2,t3,t4,t5,t6,t7,t8,t9)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.2000a20009AVG),ylab="Unidades PPM ", main="COTLA__ppm_ (Promedios Diarios ) Estación Talnepantla")
+lines(HoltWinters(COTLA_ppm.2000a20009AVG)$fitted,col="red")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+#dbListFields(connect, "SIMAT2009")
+COTLA_ppm.Limpio2000 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2000.COTLA__ppm_)",
+										"FROM SIMAT2000", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2001 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2001.COTLA__ppm_)",
+										"FROM SIMAT2001", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2002 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2002.COTLA__ppm_)",
+										"FROM SIMAT2002", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2003 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2003.COTLA__ppm_)",
+										"FROM SIMAT2003", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2004 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2004.COTLA__ppm_)",
+										"FROM SIMAT2004", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2005 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2005.COTLA__ppm_)",
+										"FROM SIMAT2005", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2006 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2006.COTLA__ppm_)",
+										"FROM SIMAT2006", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2007 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2007.COTLA__ppm_)",
+										"FROM SIMAT2007", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )
+COTLA_ppm.Limpio2008 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2008.COTLA__ppm_)",
+										"FROM SIMAT2008", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )																
+COTLA_ppm.Limpio2009 <- dbGetQuery(connect, statement = paste( "SELECT MAX(SIMAT2009.COTLA__ppm_)",
+										"FROM SIMAT2009", "WHERE COTLA__ppm_ > -9.9 GROUP BY FECHA" ) )																
+str(COTLA_ppm.Limpio2000); str(COTLA_ppm.Limpio2001); str(COTLA_ppm.Limpio2002); str(COTLA_ppm.Limpio2003);
+str(COTLA_ppm.Limpio2004); str(COTLA_ppm.Limpio2005); str(COTLA_ppm.Limpio2006); str(COTLA_ppm.Limpio2007);
+str(COTLA_ppm.Limpio2008); str(COTLA_ppm.Limpio2009);
+t0<- ts(COTLA_ppm.Limpio2000);t1<- ts(COTLA_ppm.Limpio2001);t2<- ts(COTLA_ppm.Limpio2002);t3<- ts(COTLA_ppm.Limpio2003);t4<- ts(COTLA_ppm.Limpio2004);
+t5<- ts(COTLA_ppm.Limpio2005);t6<- ts(COTLA_ppm.Limpio2006);t7<- ts(COTLA_ppm.Limpio2007);t8<- ts(COTLA_ppm.Limpio2008);t9<- ts(COTLA_ppm.Limpio2009);
+COTLA_ppm.2000a20009AVG<-ts.union(t0,t1,t2,t3,t4,t5,t6,t7,t8,t9)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.2000a20009AVG),ylab="Unidades PPM ", main="COTLA__ppm_ (Maximos Diarios) Estación Talnepantla ")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+
+
+
+
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+dbListFields(connect, "SIMAT2009")
+COTLA_ppm.Limpio <- dbGetQuery(connect, statement = paste( "SELECT MAX(COTLA__ppm_)",
+										"FROM SIMAT2009", "WHERE COTLA__ppm_> -9.9 AND FECHA BETWEEN '01/01/2000' AND '02/29/2000'" ) )
+str(COTLA_ppm.Limpio)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.Limpio),ylab="Unidades PPM", main="COTLA__ppm_")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+                                     
+
+
+
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+dbListFields(connect, "SIMAT2007","SIMAT2008","SIMAT2009")
+COTLA_ppm.Limpio <- dbGetQuery(connect, statement = paste( "SELECT COTLA__ppm_",
+										"FROM SIMAT2009,SIMAT2008,SIMAT2007", "WHERE COTLA__ppm_ > -9.9" ) )
+str(COTLA_ppm.Limpio)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.Limpio),ylab="Unidades PPM", main="COTLA__ppm_")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+dbListFields(connect, "SIMAT2009")
+COTLA_ppm.Limpio <- dbGetQuery(connect, statement = paste( "SELECT COTLA__ppm_",
+										"FROM SIMAT2009", "WHERE COTLA__ppm_ > -9.9" ) )
+str(COTLA_ppm.Limpio)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.Limpio),ylab="Unidades PPM", main="COTLA__ppm_")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+dbListFields(connect, "SIMAT2000")
+COTLA_ppm.Limpio <- dbGetQuery(connect, statement = paste( "SELECT COTLA__ppm_",
+										"FROM SIMAT2000", "WHERE COTLA__ppm_ > -9.9" ) )
+str(COTLA_ppm.Limpio)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.Limpio),ylab="Unidades PPM", main="COTLA__ppm_")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+
+##################################
+#### Enviar una Consulta #########
+##################################
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+#dbListFields(connect, "SIMAT2009")
+COTLA_ppm.Limpio.Mes1 <- dbGetQuery(connect, statement = paste( "SELECT COTLA__ppm_",
+											"FROM SIMAT2000",
+											"WHERE COTLA__ppm_ > -9.9 AND FECHA BETWEEN '01/01/2000'" ,
+											"AND '12/29/2000' " ) )
+							
+str(COTLA_ppm.Limpio.Mes1)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.Limpio.Mes1),ylab="Unidades PPM", main="COTLA__ppm_")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+##################################
+#### Enviar una Consulta #########
+##################################
+
+driver<-dbDriver("SQLite"); 
+connect<-dbConnect(driver, dbname = "SIMAT.db"); 
+#dbListFields(connect, "SIMAT2000")
+
+COTLA_ppm.Limpio.Mes1 <- dbGetQuery(connect, statement = paste( "SELECT COTLA__ppm_",
+											"FROM SIMAT2000",
+											"WHERE COTLA__ppm_ > -9.9 AND HORA BETWEEN 1 AND 24 AND FECHA BETWEEN '01/01/2000'" ,
+											"AND '01/29/2000' " ) )
+							
+str(COTLA_ppm.Limpio.Mes1)
+win.graph(width=16.875,height=5,pointsize=8)
+plot(ts(COTLA_ppm.Limpio.Mes1,start=1, end=31, frequency=1),ylab="Unidades PPM", main="COTLA__ppm_")
+sqliteCloseConnection(connect);
+sqliteCloseDriver(driver);
+
+
+
+
+names(SIMAT2000); names(SIMAT2001); names(SIMAT2002); names(SIMAT2003);
+names(SIMAT2004); names(SIMAT2005); names(SIMAT2006); names(SIMAT2007);
+names(SIMAT2008); names(SIMAT2009);
+
+attach(SIMAT2000); attach(SIMAT2001); attach(SIMAT2002); attach(SIMAT2003);
+attach(SIMAT2004); attach(SIMAT2005); attach(SIMAT2006); attach(SIMAT2007);
+attach(SIMAT2008); attach(SIMAT2009);
+
+str(SIMAT2000); str(SIMAT2001); str(SIMAT2002); str(SIMAT2003); str(SIMAT2004);
+str(SIMAT2005); str(SIMAT2006); str(SIMAT2007); str(SIMAT2008); str(SIMAT2009);
+
+
+
+#albums = dbGetQuery(con,statement='SELECT al.title,ar.name,SUM(tr.length) AS tot\
+#                                 FROM Album AS al,Artist AS ar,Track AS tr\
+#                                 WHERE tr.alid = al.alid AND tr.aid = ar.aid AND tr.aid = al.aid\
+#                                 GROUP BY tr.alid\
+#                                 HAVING tot BETWEEN 2400 AND 2700 ORDER BY tot DESC')
+# head(albums)
+#rs <- dbSendQuery(connect, "SELECT * FROM SIMAT2000 where HORA > 1")
+#dbGetStatement(rs)
+#dbHasCompleted(rs)
+#info <- dbGetInfo(rs)
+#names(info)
+# Cierra la Consulta
+sqliteCloseResult(rs);
+# CLOSE THE CONNECTION
+sqliteCloseConnection(connect);
+# CLOSE THE DRIVER
+sqliteCloseDriver(driver);
+
+SIMAT2000[, "FECHA"] <- as.Date(as.character(SIMAT2000[, "FECHA"]), format = "%Y-%m-%d")
+
+
+summary(SIMAT2000)
+xtabs(COTLA_.ppm. ~ FECHA)
+boxplot(COTLA_.ppm. ~ as.Date(FECHA), main = "Ev", xlab = "Fecha", ylab = "Peso en gramos")
+
+par(mfrow=c(2,2),oma=c(0,0,3,0))
+plot(log(Adj.Close), type="l")
+plot(diff(log(Adj.Close)), type="l", main="logged and diffed") 
+pacf(diff(log(Adj.Close)))
+acf(diff(log(Adj.Close)))
+
+dljj<- diff(log(Adj.Close))
+par(mfrow=c(2,1))        # set up the graphics 
+hist(dljj, prob=TRUE)   # histogram    
+lines(density(dljj))     # smooth it - ?density for details 
+qqnorm(dljj)             # normal Q-Q plot  
+qqline(dljj)  
